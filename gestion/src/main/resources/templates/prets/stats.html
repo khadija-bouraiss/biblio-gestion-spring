@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiques</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #F7F6E5; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background-color: #36064D !important; }
+        .navbar-brand, .nav-link { color: #F7F6E5 !important; font-weight: 600; }
+        .nav-link:hover { color: #76D2DB !important; }
+        .page-header {
+            background: linear-gradient(135deg, #36064D, #DA4848);
+            color: white; padding: 25px 30px;
+            border-radius: 16px; margin: 25px 0;
+            text-align: center;
+        }
+        .stat-card {
+            background: white; border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(54,6,77,0.1);
+            padding: 25px; text-align: center;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card .stat-number { font-size: 42px; font-weight: 800; }
+        .stat-card .stat-label { color: #666; font-size: 14px; margin-top: 5px; }
+        .card-chart { border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(54,6,77,0.1); padding: 25px; background: white; margin-bottom: 25px; }
+        .card-chart h5 { color: #36064D; font-weight: 700; margin-bottom: 20px; }
+        .table thead { background-color: #36064D; color: #F7F6E5; }
+        .table tbody tr:hover { background-color: #e8f8f9; }
+        footer { background-color: #36064D; color: #F7F6E5; text-align: center; padding: 15px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="bi bi-book-half"></i> BiblioGestion</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/ecrivains"><i class="bi bi-person-lines-fill"></i> Écrivains</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ouvrages"><i class="bi bi-journals"></i> Ouvrages</a></li>
+                <li class="nav-item"><a class="nav-link" href="/prets"><i class="bi bi-arrow-left-right"></i> Prêts</a></li>
+                <li class="nav-item"><a class="nav-link" href="/prets/stats"><i class="bi bi-bar-chart-fill"></i> Statistiques</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h2><i class="bi bi-bar-chart-fill"></i> Tableau de Bord — Statistiques</h2>
+        <p class="mb-0">Analyse des prêts, retards et écrivains populaires</p>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number" style="color:#76D2DB" th:text="${#lists.size(prets != null ? prets : pretParMois)}">0</div>
+                <div class="stat-label"><i class="bi bi-arrow-left-right"></i> Total Prêts</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number" style="color:#DA4848" th:text="${#numbers.formatDecimal(tauxRetard, 1, 1) + '%'}">0%</div>
+                <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Taux de Retard</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number" style="color:#36064D" th:text="${#lists.size(ecrivainsPopulaires)}">0</div>
+                <div class="stat-label"><i class="bi bi-person-lines-fill"></i> Écrivains actifs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- GRAPHIQUE PRETS PAR MOIS -->
+        <div class="col-md-6">
+            <div class="card-chart">
+                <h5><i class="bi bi-bar-chart" style="color:#76D2DB"></i> Prêts par Mois</h5>
+                <canvas id="chartMois"></canvas>
+            </div>
+        </div>
+
+        <!-- ECRIVAINS LES PLUS EMPRUNTES -->
+        <div class="col-md-6">
+            <div class="card-chart">
+                <h5><i class="bi bi-trophy" style="color:#DA4848"></i> Écrivains les plus empruntés</h5>
+                <canvas id="chartEcrivains"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE ECRIVAINS -->
+    <div class="card-chart mt-4">
+        <h5><i class="bi bi-person-lines-fill" style="color:#36064D"></i> Détail — Écrivains populaires</h5>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Rang</th>
+                <th>Écrivain</th>
+                <th>Nombre de prêts</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row, stat : ${ecrivainsPopulaires}">
+                <td>
+                    <span th:if="${stat.index == 0}">🥇</span>
+                    <span th:if="${stat.index == 1}">🥈</span>
+                    <span th:if="${stat.index == 2}">🥉</span>
+                    <span th:if="${stat.index > 2}" th:text="${stat.index + 1}"></span>
+                </td>
+                <td th:text="${row[0]}"></td>
+                <td>
+                    <span class="badge" style="background-color:#76D2DB; color:#36064D; font-size:14px; padding:6px 14px; border-radius:8px;" th:text="${row[1]}"></span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(ecrivainsPopulaires)}">
+                <td colspan="3" class="text-center text-muted py-3">Aucune donnée disponible</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer><p>📚 BiblioGestion — Développé avec Spring Boot & Thymeleaf</p></footer>
+
+<script th:inline="javascript">
+    // Données depuis Thymeleaf
+    const pretParMois = /*[[${pretParMois}]]*/ [];
+    const ecrivainsPopulaires = /*[[${ecrivainsPopulaires}]]*/ [];
+
+    const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    const moisData = new Array(12).fill(0);
+    pretParMois.forEach(row => { moisData[row[0] - 1] = row[1]; });
+
+    // Chart Mois
+    new Chart(document.getElementById('chartMois'), {
+        type: 'bar',
+        data: {
+            labels: moisLabels,
+            datasets: [{
+                label: 'Prêts',
+                data: moisData,
+                backgroundColor: '#76D2DB',
+                borderRadius: 8
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Chart Écrivains
+    new Chart(document.getElementById('chartEcrivains'), {
+        type: 'doughnut',
+        data: {
+            labels: ecrivainsPopulaires.map(r => r[0]),
+            datasets: [{
+                data: ecrivainsPopulaires.map(r => r[1]),
+                backgroundColor: ['#36064D','#76D2DB','#DA4848','#F7F6E5','#9b59b6'],
+                borderWidth: 2
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>📚 Gestion Bibliothèque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #F7F6E5; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background-color: #36064D !important; padding: 15px 0; }
+        .navbar-brand { color: #F7F6E5 !important; font-weight: 700; font-size: 22px; }
+        .nav-link { color: #F7F6E5 !important; font-weight: 600; margin: 0 5px; }
+        .nav-link:hover { color: #76D2DB !important; }
+        .hero {
+            background: linear-gradient(135deg, #36064D 0%, #76D2DB 100%);
+            color: white;
+            padding: 70px 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .hero h1 { font-size: 38px; font-weight: 800; margin-bottom: 12px; }
+        .hero p { font-size: 18px; opacity: 0.9; }
+        .card-module {
+            border: none;
+            border-radius: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+            min-height: 260px;
+        }
+        .card-module:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(54, 6, 77, 0.25);
+        }
+        .card-ecrivain {
+            background: linear-gradient(135deg, #36064D 0%, #76D2DB 100%);
+        }
+        .card-ouvrage {
+            background: linear-gradient(135deg, #76D2DB 0%, #36064D 100%);
+        }
+        .card-pret {
+            background: linear-gradient(135deg, #DA4848 0%, #36064D 100%);
+        }
+        .card-module .card-body {
+            color: white !important;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 260px;
+        }
+        .card-icon { font-size: 60px; margin-bottom: 15px; }
+        .card-module h4 {
+            color: white !important;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .card-module p {
+            color: rgba(255,255,255,0.85) !important;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .btn-module {
+            background-color: #F7F6E5;
+            color: #36064D;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 25px;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+        .btn-module:hover {
+            background-color: white;
+            color: #DA4848;
+            transform: scale(1.05);
+        }
+        .stats-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(54,6,77,0.1);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stat-item { text-align: center; }
+        .stat-item .stat-num { font-size: 32px; font-weight: 800; color: #36064D; }
+        .stat-item .stat-label { color: #666; font-size: 13px; }
+        footer {
+            background-color: #36064D;
+            color: #F7F6E5;
+            text-align: center;
+            padding: 20px;
+            margin-top: 60px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">📚 BiblioGestion</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span style="color:white; font-size:22px;">☰</span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/ecrivains">✍️ Écrivains</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ouvrages">📖 Ouvrages</a></li>
+                <li class="nav-item"><a class="nav-link" href="/prets">🔄 Prêts</a></li>
+                <li class="nav-item"><a class="nav-link" href="/prets/stats">📊 Statistiques</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- HERO -->
+    <div class="hero">
+        <h1>📚 Bienvenue dans BiblioGestion</h1>
+        <p>Gérez vos ouvrages, écrivains et prêts facilement</p>
+    </div>
+
+    <!-- CARDS -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card card-module card-ecrivain h-100">
+                <div class="card-body">
+                    <div class="card-icon">✍️</div>
+                    <h4>Écrivains</h4>
+                    <p>Gérez le catalogue des écrivains et leur nationalité</p>
+                    <a href="/ecrivains" class="btn-module">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-module card-ouvrage h-100">
+                <div class="card-body">
+                    <div class="card-icon">📖</div>
+                    <h4>Ouvrages</h4>
+                    <p>Gérez le catalogue des ouvrages et leur disponibilité</p>
+                    <a href="/ouvrages" class="btn-module">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-module card-pret h-100">
+                <div class="card-body">
+                    <div class="card-icon">🔄</div>
+                    <h4>Prêts</h4>
+                    <p>Suivez les prêts, retours et retards</p>
+                    <a href="/prets" class="btn-module">Accéder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRE STATS -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-num" style="color:#36064D;">📚</div>
+            <div class="stat-label">Système de gestion de bibliothèque</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" style="color:#76D2DB;">✍️</div>
+            <div class="stat-label">Gestion des écrivains</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" style="color:#DA4848;">🔄</div>
+            <div class="stat-label">Suivi des prêts et retards</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" style="color:#36064D;">📊</div>
+            <div class="stat-label">Statistiques & rapports</div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>📚 BiblioGestion — Développé avec Spring Boot 3.2.5 & Thymeleaf</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
